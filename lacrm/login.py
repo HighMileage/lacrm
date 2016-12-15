@@ -1,0 +1,2 @@
+def LacrmLogin():
+    return None
