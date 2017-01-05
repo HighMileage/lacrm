@@ -4,6 +4,7 @@ import logging
 import warnings
 import requests
 import json
+from utils import LacrmArgumentError, BaseLacrmError
 
 try:
     from urlparse import urlparse, urljoin
@@ -38,59 +39,114 @@ class Lacrm(object):
         }
         self.endpoint_url = 'https://api.lessannoyingcrm.com'
 
+        # Mapping that allows us to parse different API methods' response meaningfully
+        self.api_method_responses = {'CreateContact': 'ContactId',
+                                     'GetContact': 'Contact',
+                                     'Search': 'Results'
+        }
 
+
+    def api_call(func):
+        """ Decorator calls out to the API for specifics API methods """
+
+        def make_api_call(self, *args, **kwargs):
+            api_method, parameters = func(self, * args, **kwargs)
+
+            method_payload = self.payload
+            method_payload['Function'] = api_method
+            method_payload['Parameters'] = json.dumps(parameters)
+
+            response = requests.post(self.endpoint_url, data=method_payload).json()
+
+            if response.get('Success') == False:
+                raise BaseLacrmError(content='Unknown error occurred -- check https://www.lessannoyingcrm.com/account/api/ for more detailed information.')
+            else:
+                print response
+                return response.get(self.api_method_responses.get(api_method))
+
+        return make_api_call
+
+    @api_call
     def search(self, term):
-        method_payload = self.payload
-        method_payload['Function'] = 'SearchContacts'
+        """ Searches LACRM contacts for a given term """
 
+        api_method = 'SearchContacts'
         parameters = {'SearchTerms': term}
-        method_payload['Parameters'] = json.dumps(parameters)
-        
-        r = requests.post(self.endpoint_url, data=method_payload)
-        response = r.json()
-        if response.get('Success') == False:
-            return LacrmError(response.get('Error'))
-        else:
-            return response.get('Result')
 
-    def create_contact(self,*args,**kwargs):
+        return api_method, parameters
+
+
+    @api_call
+    def add_contact_to_group(self, *args, **kwargs):
+        """ Adds a contact to a group in LACRM """
+
         parameters = {}
+        api_method = 'AddContactToGroup'
+
         for key,value in kwargs.items():
             parameters[key] = value
 
-        method_payload = self.payload
-        method_payload['Function'] = 'CreateContact'
+        return api_method, parameters
 
-        method_payload['Parameters'] = json.dumps(parameters)
-        
-        print method_payload
-        r = requests.post(self.endpoint_url, data=method_payload)
-        response = r.json()
-        if response.get('Success') == False:
-            return LacrmError(response.get('Error'))
-        else:
-            return response.get('Result')
-        # if kwargs.keys not in ['FullName', 'Salutation', 'FirstName', 'MiddleName', 'LastName',
-        #  'Suffix', 'CompanyName', 'CompanyId', 'Title', 'Industry',
-        #  'NumEmployees', 'BackgroundInfo', 'Email', 'Phone', 'Address',
-        #  'Website', 'Birthday', 'CustomFields', 'assignedTo']:
-        #
-        # 'FullName'
-        # 'Salutation'
-        # 'FirstName'
-        # 'MiddleName'
-        # 'LastName'
-        # 'Suffix'
-        # 'CompanyName'
-        # 'CompanyId'
-        # 'Title'
-        # 'Industry'
-        # 'NumEmployees'
-        # 'BackgroundInfo'
-        # 'Email'
-        # 'Phone'
-        # 'Address'
-        # 'Website'
-        # 'Birthday'
-        # 'CustomFields'
-        # 'assignedTo'
+
+    @api_call
+    def delete_contact(self, *args, **kwargs):
+        """ Deletes a given contact from LACRM """
+
+        parameters = {}
+        api_method = 'DeleteContact'
+
+        for key,value in kwargs.items():
+            parameters[key] = value
+
+        return api_method, parameters
+
+    @api_call
+    def get_contact(self, *args, **kwargs):
+        """ Get all information in LACRM for given contact """
+
+        parameters = {}
+        api_method = 'GetContact'
+
+        for key,value in kwargs.items():
+            parameters[key] = value
+
+        return api_method, parameters
+
+    @api_call
+    def create_contact(self,*args,**kwargs):
+        """ Creates a new contact in LACRM for given """
+
+        parameters = {}
+        api_method = 'CreateContact'
+        expected_parameters = ['FullName',
+                               'Salutation',
+                               'FirstName',
+                               'MiddleName',
+                               'LastName',
+                               'Suffix',
+                               'CompanyName',
+                               'CompanyId',
+                               'Title',
+                               'Industry',
+                               'NumEmployees',
+                               'BackgroundInfo',
+                               'Email',
+                               'Phone',
+                               'Address',
+                               'Website',
+                               'Birthday',
+                               'CustomFields',
+                               'assignedTo']
+
+        for key,value in kwargs.items():
+            parameters[key] = value
+
+        self.__validator(parameters.keys(), expected_parameters)
+        return api_method, parameters
+
+    def __validator(self, parameters, known_parameters):
+        for param in parameters:
+            if param not in known_parameters:
+                raise LacrmArgumentError(content='The provided parameter "{}" cannot be recognized by the API'.format(param))
+        return
