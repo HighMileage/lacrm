@@ -7,10 +7,11 @@ class BaseLacrmError(Exception):
         self.content = content
 
     def __str__(self):
-        return self.message.format(content = self.content)
+        return self.message.format(content=self.content)
 
     def __unicode__(self):
         return self.__str__()
+
 
 class LacrmArgumentError(BaseLacrmError):
     """Unknown argument Lacrm API Exception"""
@@ -21,7 +22,7 @@ class LacrmArgumentError(BaseLacrmError):
         self.content = content
 
     def __str__(self):
-        return self.message.format(content = self.content)
+        return self.message.format(content=self.content)
 
     def __unicode__(self):
         return self.__str__()
