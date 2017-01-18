@@ -4,6 +4,7 @@ import logging
 import requests
 import json
 from utils import LacrmArgumentError, BaseLacrmError
+from __future__ import print_function
 
 logger = logging.getLogger(__name__)
 
@@ -295,7 +296,7 @@ class Lacrm(object):
             elif status in ['all', 'closed']:
                 params['StatusFilter'] = status
             else:
-                print 'That status code is not recognized via the API.'
+                print('That status code is not recognized via the API.')
 
             respjson = self.get_pipeline_report(**params)
 
