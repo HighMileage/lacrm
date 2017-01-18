@@ -15,8 +15,8 @@ python:
 install:
   - pip install tox
   - pip install .
-  - pip install requirements.txt
-  - pip install test-requirements.txt
+  - pip install -r requirements.txt
+  - pip install -r test-requirements.txt
 
 
 script:
