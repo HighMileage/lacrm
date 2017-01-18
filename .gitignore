@@ -1,3 +1,8 @@
 *.pyc
 *.ipynb
 *.ipynb_checkpoints
+.tox/
+.coverage
+.cache
+*.egg
+*.egg-info
