@@ -1,10 +1,10 @@
 "Core classes and exceptions for lacrm"
 
+from __future__ import print_function
 import logging
 import requests
 import json
 from utils import LacrmArgumentError, BaseLacrmError
-from __future__ import print_function
 
 logger = logging.getLogger(__name__)
 
