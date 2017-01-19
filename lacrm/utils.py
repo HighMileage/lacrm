@@ -1,3 +1,6 @@
+"Utilities classes for lacrm module"
+
+
 class BaseLacrmError(Exception):
     """Base Lacrm API Exception"""
 

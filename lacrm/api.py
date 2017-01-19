@@ -4,9 +4,9 @@ from __future__ import print_function
 import logging
 import requests
 import json
-from utils import LacrmArgumentError, BaseLacrmError
+from lacrm.utils import LacrmArgumentError, BaseLacrmError
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class Lacrm(object):
@@ -34,8 +34,8 @@ class Lacrm(object):
     def api_call(func):
         """ Decorator calls out to the API for specifics API methods """
 
-        def make_api_call(self, *args, **kwargs):
-            api_method, parameters = func(self, * args, **kwargs)
+        def make_api_call(self, **kwargs):
+            api_method, parameters = func(self, **kwargs)
 
             method_payload = self.payload
             method_payload['Function'] = api_method
@@ -63,7 +63,7 @@ class Lacrm(object):
         return api_method, parameters
 
     @api_call
-    def add_contact_to_group(self, *args, **kwargs):
+    def add_contact_to_group(self, **kwargs):
         """ Adds a contact to a group in LACRM """
 
         parameters = {}
@@ -75,7 +75,7 @@ class Lacrm(object):
         return api_method, parameters
 
     @api_call
-    def delete_contact(self, *args, **kwargs):
+    def delete_contact(self, **kwargs):
         """ Deletes a given contact from LACRM """
 
         parameters = {}
@@ -87,7 +87,7 @@ class Lacrm(object):
         return api_method, parameters
 
     @api_call
-    def get_contact(self, *args, **kwargs):
+    def get_contact(self, **kwargs):
         """ Get all information in LACRM for given contact """
 
         parameters = {}
@@ -99,7 +99,7 @@ class Lacrm(object):
         return api_method, parameters
 
     @api_call
-    def create_contact(self, *args, **kwargs):
+    def create_contact(self, **kwargs):
         """ Creates a new contact in LACRM for given """
 
         parameters = {}
@@ -131,7 +131,7 @@ class Lacrm(object):
         return api_method, parameters
 
     @api_call
-    def edit_contact(self, *args, **kwargs):
+    def edit_contact(self, **kwargs):
         """ Edits a contact in LACRM for given """
 
         parameters = {}
@@ -164,7 +164,7 @@ class Lacrm(object):
         return api_method, parameters
 
     @api_call
-    def create_pipeline(self, *args, **kwargs):
+    def create_pipeline(self, **kwargs):
         """ Creates a new pipeline in LACRM for given contactid """
 
         parameters = {}
@@ -183,7 +183,7 @@ class Lacrm(object):
         return api_method, parameters
 
     @api_call
-    def update_pipeline(self, *args, **kwargs):
+    def update_pipeline(self, **kwargs):
         """ Update a pipeline in LACRM """
 
         parameters = {}
@@ -201,7 +201,7 @@ class Lacrm(object):
         return api_method, parameters
 
     @api_call
-    def create_note(self, *args, **kwargs):
+    def create_note(self, **kwargs):
         """ Creates a new note in LACRM for a given contactid """
 
         parameters = {}
@@ -220,7 +220,7 @@ class Lacrm(object):
         return api_method, parameters
 
     @api_call
-    def create_task(self, *args, **kwargs):
+    def create_task(self, **kwargs):
         """ Creates a new task in LACRM """
 
         parameters = {}
@@ -238,7 +238,7 @@ class Lacrm(object):
         return api_method, parameters
 
     @api_call
-    def create_event(self, *args, **kwargs):
+    def create_event(self, **kwargs):
         """ Creates a new event in LACRM """
 
         parameters = {}
@@ -258,7 +258,7 @@ class Lacrm(object):
         return api_method, parameters
 
     @api_call
-    def get_pipeline_report(self, *args, **kwargs):
+    def get_pipeline_report(self, **kwargs):
         """ Grabs a pipeline_report in LACRM """
 
         parameters = {}
