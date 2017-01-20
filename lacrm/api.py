@@ -4,7 +4,7 @@ from __future__ import print_function
 import logging
 import requests
 import json
-from lacrm.utils import LacrmArgumentError, BaseLacrmError
+from utils import LacrmArgumentError, BaseLacrmError
 
 LOGGER = logging.getLogger(__name__)
 
@@ -34,8 +34,17 @@ class Lacrm(object):
     def api_call(func):
         """ Decorator calls out to the API for specifics API methods """
 
-        def make_api_call(self, **kwargs):
-            api_method, parameters = func(self, **kwargs)
+        def make_api_call(self, *args):
+
+            api_method, data, expected_parameters = func(self, *args)
+
+            parameters = {}
+            print(data)
+            for key, value in data.items():
+                parameters[key] = value
+
+            if expected_parameters:
+                self.__validator(parameters.keys(), expected_parameters)
 
             method_payload = self.payload
             method_payload['Function'] = api_method
@@ -60,7 +69,7 @@ class Lacrm(object):
         api_method = 'SearchContacts'
         parameters = {'SearchTerms': term}
 
-        return api_method, parameters
+        return api_method, parameters, None
 
     @api_call
     def add_contact_to_group(self, **kwargs):
@@ -87,22 +96,17 @@ class Lacrm(object):
         return api_method, parameters
 
     @api_call
-    def get_contact(self, **kwargs):
+    def get_contact(self, data):
         """ Get all information in LACRM for given contact """
 
-        parameters = {}
         api_method = 'GetContact'
 
-        for key, value in kwargs.items():
-            parameters[key] = value
-
-        return api_method, parameters
+        return api_method, data, None
 
     @api_call
-    def create_contact(self, **kwargs):
-        """ Creates a new contact in LACRM for given """
+    def create_contact(self, data):
+        """ Creates a new contact in LACRM """
 
-        parameters = {}
         api_method = 'CreateContact'
         expected_parameters = ['FullName',
                                'Salutation',
@@ -124,11 +128,7 @@ class Lacrm(object):
                                'CustomFields',
                                'assignedTo']
 
-        for key, value in kwargs.items():
-            parameters[key] = value
-
-        self.__validator(parameters.keys(), expected_parameters)
-        return api_method, parameters
+        return api_method, data, expected_parameters
 
     @api_call
     def edit_contact(self, **kwargs):
@@ -313,7 +313,7 @@ class Lacrm(object):
     def __validator(self, parameters, known_parameters):
         for param in parameters:
             if param not in known_parameters:
-                raise LacrmArgumentError(content='The provided parameter "{}"'
+                raise LacrmArgumentError(content='The provided parameter "{}" '
                                          'cannot be recognized by the'
                                          'API'.format(param))
         return
