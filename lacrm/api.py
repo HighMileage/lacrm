@@ -39,7 +39,6 @@ class Lacrm(object):
             api_method, data, expected_parameters = func(self, *args)
 
             parameters = {}
-            print(data)
             for key, value in data.items():
                 parameters[key] = value
 
@@ -50,14 +49,14 @@ class Lacrm(object):
             method_payload['Function'] = api_method
             method_payload['Parameters'] = json.dumps(parameters)
 
-            response = requests.post(self.endpoint_url,
-                                     data=method_payload).json()
+            response = requests.post(self.endpoint_url, data=method_payload)
 
-            if not response.get('Success'):
+            if response.status_code != 200:
                 raise BaseLacrmError(content='Unknown error occurred -- check'
                                      'https://www.lessannoyingcrm.com/account/'
                                      'api/ for more detailed information.')
             else:
+                response = response.json()
                 return response.get(self.api_method_responses.get(api_method))
 
         return make_api_call
@@ -67,38 +66,46 @@ class Lacrm(object):
         """ Searches LACRM contacts for a given term """
 
         api_method = 'SearchContacts'
-        parameters = {'SearchTerms': term}
+        data = {'SearchTerms': term}
 
-        return api_method, parameters, None
+        return api_method, data, None
 
     @api_call
-    def add_contact_to_group(self, **kwargs):
+    def add_contact_to_group(self, contact_id, group_name):
         """ Adds a contact to a group in LACRM """
 
-        parameters = {}
+        data = {}
+        data['ContactId'] = contact_id
+        data['GroupName'] = group_name
+
+        if group_name.find(' '):
+                raise LacrmArgumentError(
+                    content='The group name you passed "{0}" contains spaces. '
+                    'You need to replace them with underscores (eg "cool group"'
+                    'should be "cool_group"). See '
+                    'https://www.lessannoyingcrm.com/help/topic/API_Function_Definitions/8/AddContactToGroup+Function+Definition '
+                    'for more details.'.format(group_name))
+
         api_method = 'AddContactToGroup'
 
-        for key, value in kwargs.items():
-            parameters[key] = value
-
-        return api_method, parameters
+        return api_method, data, None
 
     @api_call
-    def delete_contact(self, **kwargs):
+    def delete_contact(self, contact_id):
         """ Deletes a given contact from LACRM """
 
-        parameters = {}
+        data = {}
+        data['ConatctId'] = contact_id
         api_method = 'DeleteContact'
 
-        for key, value in kwargs.items():
-            parameters[key] = value
-
-        return api_method, parameters
+        return api_method, data, None
 
     @api_call
-    def get_contact(self, data):
+    def get_contact(self, contact_id):
         """ Get all information in LACRM for given contact """
 
+        data = {}
+        data['ConatctId'] = contact_id
         api_method = 'GetContact'
 
         return api_method, data, None
@@ -131,10 +138,11 @@ class Lacrm(object):
         return api_method, data, expected_parameters
 
     @api_call
-    def edit_contact(self, **kwargs):
+    def edit_contact(self, contact_id, data):
         """ Edits a contact in LACRM for given """
 
-        parameters = {}
+        data = {}
+        data['ConatctId'] = contact_id
         api_method = 'EditContact'
         expected_parameters = ['FullName',
                                'Salutation',
@@ -157,17 +165,14 @@ class Lacrm(object):
                                'CustomFields',
                                'assignedTo']
 
-        for key, value in kwargs.items():
-            parameters[key] = value
-
-        self.__validator(parameters.keys(), expected_parameters)
-        return api_method, parameters
+        return api_method, data, expected_parameters
 
     @api_call
-    def create_pipeline(self, **kwargs):
+    def create_pipeline(self, contact_id, data):
         """ Creates a new pipeline in LACRM for given contactid """
 
-        parameters = {}
+        data = {}
+        data['ConatctId'] = contact_id
         api_method = 'CreatePipeline'
         expected_parameters = ['ContactId',
                                'Note',
@@ -176,17 +181,13 @@ class Lacrm(object):
                                'Priority',
                                'CustomFields']
 
-        for key, value in kwargs.items():
-            parameters[key] = value
-
-        self.__validator(parameters.keys(), expected_parameters)
-        return api_method, parameters
+        return api_method, data, expected_parameters
 
     @api_call
-    def update_pipeline(self, **kwargs):
+    def update_pipeline(self, pipeline_id, data):
         """ Update a pipeline in LACRM """
 
-        parameters = {}
+        data['ConatctId'] = pipeline_id
         api_method = 'UpdatePipelineItem'
         expected_parameters = ['PipelineItemId',
                                'Note',
@@ -194,17 +195,14 @@ class Lacrm(object):
                                'Priority',
                                'CustomFields']
 
-        for key, value in kwargs.items():
-            parameters[key] = value
-
-        self.__validator(parameters.keys(), expected_parameters)
-        return api_method, parameters
+        return api_method, data, expected_parameters
 
     @api_call
-    def create_note(self, **kwargs):
+    def create_note(self, contact_id, data):
         """ Creates a new note in LACRM for a given contactid """
 
-        parameters = {}
+        data = {}
+        data['ConatctId'] = contact_id
         api_method = 'CreateNote'
         expected_parameters = ['ContactId',
                                'Note',
@@ -213,17 +211,12 @@ class Lacrm(object):
                                'Priority',
                                'CustomFields']
 
-        for key, value in kwargs.items():
-            parameters[key] = value
-
-        self.__validator(parameters.keys(), expected_parameters)
-        return api_method, parameters
+        return api_method, data, expected_parameters
 
     @api_call
-    def create_task(self, **kwargs):
+    def create_task(self, data):
         """ Creates a new task in LACRM """
 
-        parameters = {}
         api_method = 'CreateTask'
         expected_parameters = ['ContactId',
                                'DueDate',  # YYYY-MM-DD
@@ -231,37 +224,36 @@ class Lacrm(object):
                                'ContactId',
                                'AssignedTo']
 
-        for key, value in kwargs.items():
-            parameters[key] = value
-
-        self.__validator(parameters.keys(), expected_parameters)
-        return api_method, parameters
+        return api_method, data, expected_parameters
 
     @api_call
-    def create_event(self, **kwargs):
+    def create_event(self, date, start_time, end_time, name):
         """ Creates a new event in LACRM """
 
-        parameters = {}
+        data = {}
+        data['Date'] = date
+        data['StartTime'] = start_time
+        data['EndTime'] = end_time
+        data['Name'] = name
+
         api_method = 'CreateEvent'
         expected_parameters = ['Date',
-                               'StartTime',
-                               'EndTime',
+                               'StartTime',  # 24:00
+                               'EndTime',  # 24:00
                                'Name',
                                'Description',
                                'Contacts',
                                'Users']
 
-        for key, value in kwargs.items():
-            parameters[key] = value
-
-        self.__validator(parameters.keys(), expected_parameters)
-        return api_method, parameters
+        return api_method, data, expected_parameters
 
     @api_call
-    def get_pipeline_report(self, **kwargs):
+    def get_pipeline_report(self, pipeline_id):
         """ Grabs a pipeline_report in LACRM """
 
-        parameters = {}
+        data = {}
+        data['PipelineId'] = pipeline_id
+
         api_method = 'GetPipelineReport'
         expected_parameters = ['PipelineId',
                                'SortBy',
@@ -271,13 +263,9 @@ class Lacrm(object):
                                'UserFilter',
                                'StatusFilter']
 
-        for key, value in kwargs.items():
-            parameters[key] = value
+        return api_method, data, expected_parameters
 
-        self.__validator(parameters.keys(), expected_parameters)
-        return api_method, parameters
-
-    def getall_pipeline_report(self, pipeline_item_id, status=None):
+    def getall_pipeline_report(self, pipeline_id, status=None):
         """ Grabs a pipeline_report in LACRM """
 
         continue_flag = True
@@ -286,8 +274,7 @@ class Lacrm(object):
 
         while continue_flag:
 
-            params = {'PipelineId': pipeline_item_id,
-                      'NumRows': 500,
+            params = {'NumRows': 500,
                       'Page': page,
                       'SortBy': 'Status'}
 
@@ -298,7 +285,7 @@ class Lacrm(object):
             else:
                 print('That status code is not recognized via the API.')
 
-            respjson = self.get_pipeline_report(**params)
+            respjson = self.get_pipeline_report(pipeline_id, params)
 
             for i in respjson:
                 output.append(i)
