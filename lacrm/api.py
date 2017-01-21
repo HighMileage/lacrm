@@ -4,7 +4,7 @@ from __future__ import print_function
 import logging
 import requests
 import json
-from utils import LacrmArgumentError, BaseLacrmError
+from lacrm.utils import LacrmArgumentError, BaseLacrmError
 
 LOGGER = logging.getLogger(__name__)
 

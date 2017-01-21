@@ -1,5 +1,7 @@
 " Tests for api.py "
-
+import re
+import pytest
+from lacrm.api import Lacrm
 import responses
 try:
     # Python 2.6/2.7
@@ -9,9 +11,6 @@ except ImportError:
     # Python 3
     import http.client as http
     # from unittest.mock import Mock, patch
-import re
-import pytest
-from lacrm.api import Lacrm
 
 @pytest.fixture
 def lacrm_conn():
