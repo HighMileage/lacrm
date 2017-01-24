@@ -28,7 +28,7 @@ class Lacrm(object):
         # meaningfully
         self.api_method_responses = {'CreateContact': 'ContactId',
                                      'GetContact': 'Contact',
-                                     'Search': 'Results',
+                                     'SearchContacts': 'Results',
                                      'GetPipelineReport': 'Result'}
 
     def api_call(func):
@@ -51,13 +51,14 @@ class Lacrm(object):
 
             response = requests.post(self.endpoint_url, data=method_payload)
 
-            if response.status_code != 200:
+            status_code = response.status_code
+            if status_code != 200:
                 raise BaseLacrmError(content='Unknown error occurred -- check'
                                      'https://www.lessannoyingcrm.com/account/'
                                      'api/ for more detailed information.')
             else:
                 response = response.json()
-                return response.get(self.api_method_responses.get(api_method))
+                return response.get(self.api_method_responses.get(api_method), status_code)
 
         return make_api_call
 
@@ -78,11 +79,11 @@ class Lacrm(object):
         data['ContactId'] = contact_id
         data['GroupName'] = group_name
 
-        if group_name.find(' '):
+        if group_name.find(' ') > 0:
                 raise LacrmArgumentError(
                     content='The group name you passed "{0}" contains spaces. '
-                    'You need to replace them with underscores (eg "cool group"'
-                    'should be "cool_group"). See '
+                    'Spaces should be replaced them with underscores (eg "cool '
+                    'group" should be "cool_group"). See '
                     'https://www.lessannoyingcrm.com/help/topic/API_Function_Definitions/8/AddContactToGroup+Function+Definition '
                     'for more details.'.format(group_name))
 
@@ -141,8 +142,7 @@ class Lacrm(object):
     def edit_contact(self, contact_id, data):
         """ Edits a contact in LACRM for given """
 
-        data = {}
-        data['ConatctId'] = contact_id
+        data['ContactId'] = contact_id
         api_method = 'EditContact'
         expected_parameters = ['FullName',
                                'Salutation',
@@ -171,7 +171,6 @@ class Lacrm(object):
     def create_pipeline(self, contact_id, data):
         """ Creates a new pipeline in LACRM for given contactid """
 
-        data = {}
         data['ConatctId'] = contact_id
         api_method = 'CreatePipeline'
         expected_parameters = ['ContactId',
@@ -301,6 +300,6 @@ class Lacrm(object):
         for param in parameters:
             if param not in known_parameters:
                 raise LacrmArgumentError(content='The provided parameter "{}" '
-                                         'cannot be recognized by the'
+                                         'cannot be recognized by the '
                                          'API'.format(param))
         return
