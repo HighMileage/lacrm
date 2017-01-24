@@ -14,7 +14,7 @@ except ImportError:
 
 testdata = [
         {'Email': 'coolgal@fakemail.com'},
-        {'FirstName': 'Bob', 'LaName': 'Vila'}
+        {'FirstName': 'Bob', 'LastName': 'Vila'}
         ]
 
 @pytest.fixture
