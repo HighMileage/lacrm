@@ -1,1 +1,3 @@
-"This is the init thing"
+"lacrm package"
+
+from lacrm.api import Lacrm  # noqa

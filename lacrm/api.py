@@ -27,14 +27,17 @@ class Lacrm(object):
         # Mapping that allows us to parse different API methods' response
         # meaningfully
         self.api_method_responses = {'CreateContact': 'ContactId',
+                                     'CreateNote': 'NoteId',
+                                     'CreateTask': 'TaskId',
                                      'GetContact': 'Contact',
+                                     'CreatePipeline': 'PipelineItemId',
                                      'SearchContacts': 'Results',
                                      'GetPipelineReport': 'Result'}
 
     def api_call(func):
         """ Decorator calls out to the API for specifics API methods """
 
-        def make_api_call(self, *args):
+        def make_api_call(self, *args, **kwargs):
 
             api_method, data, expected_parameters = func(self, *args)
 
@@ -56,6 +59,8 @@ class Lacrm(object):
                 raise BaseLacrmError(content='Unknown error occurred -- check'
                                      'https://www.lessannoyingcrm.com/account/'
                                      'api/ for more detailed information.')
+            elif kwargs.get('raw_response'):
+                return response.json()
             else:
                 response = response.json()
                 return response.get(self.api_method_responses.get(api_method), status_code)
@@ -63,7 +68,7 @@ class Lacrm(object):
         return make_api_call
 
     @api_call
-    def search(self, term):
+    def search(self, term, raw_response=False):
         """ Searches LACRM contacts for a given term """
 
         api_method = 'SearchContacts'
@@ -72,7 +77,7 @@ class Lacrm(object):
         return api_method, data, None
 
     @api_call
-    def add_contact_to_group(self, contact_id, group_name):
+    def add_contact_to_group(self, contact_id, group_name, raw_response=False):
         """ Adds a contact to a group in LACRM """
 
         data = {}
@@ -92,21 +97,21 @@ class Lacrm(object):
         return api_method, data, None
 
     @api_call
-    def delete_contact(self, contact_id):
+    def delete_contact(self, contact_id, raw_response=False):
         """ Deletes a given contact from LACRM """
 
         data = {}
-        data['ConatctId'] = contact_id
+        data['ContactId'] = contact_id
         api_method = 'DeleteContact'
 
         return api_method, data, None
 
     @api_call
-    def get_contact(self, contact_id):
+    def get_contact(self, contact_id, raw_response=False):
         """ Get all information in LACRM for given contact """
 
         data = {}
-        data['ConatctId'] = contact_id
+        data['ContactId'] = contact_id
         api_method = 'GetContact'
 
         return api_method, data, None
@@ -139,7 +144,7 @@ class Lacrm(object):
         return api_method, data, expected_parameters
 
     @api_call
-    def edit_contact(self, contact_id, data):
+    def edit_contact(self, contact_id, data, raw_response=False):
         """ Edits a contact in LACRM for given """
 
         data['ContactId'] = contact_id
@@ -168,10 +173,10 @@ class Lacrm(object):
         return api_method, data, expected_parameters
 
     @api_call
-    def create_pipeline(self, contact_id, data):
+    def create_pipeline(self, contact_id, data, raw_response=False):
         """ Creates a new pipeline in LACRM for given contactid """
 
-        data['ConatctId'] = contact_id
+        data['ContactId'] = contact_id
         api_method = 'CreatePipeline'
         expected_parameters = ['ContactId',
                                'Note',
@@ -183,10 +188,10 @@ class Lacrm(object):
         return api_method, data, expected_parameters
 
     @api_call
-    def update_pipeline(self, pipeline_id, data):
+    def update_pipeline(self, pipeline_item_id, data, raw_response=False):
         """ Update a pipeline in LACRM """
 
-        data['ConatctId'] = pipeline_id
+        data['PipelineItemId'] = pipeline_item_id
         api_method = 'UpdatePipelineItem'
         expected_parameters = ['PipelineItemId',
                                'Note',
@@ -197,23 +202,19 @@ class Lacrm(object):
         return api_method, data, expected_parameters
 
     @api_call
-    def create_note(self, contact_id, data):
+    def create_note(self, contact_id, note, raw_response=False):
         """ Creates a new note in LACRM for a given contactid """
 
         data = {}
-        data['ConatctId'] = contact_id
+        data['ContactId'] = contact_id
+        data['Note'] = note
         api_method = 'CreateNote'
-        expected_parameters = ['ContactId',
-                               'Note',
-                               'PipelineId',
-                               'StatusId',
-                               'Priority',
-                               'CustomFields']
+        expected_parameters = ['ContactId', 'Note']
 
         return api_method, data, expected_parameters
 
     @api_call
-    def create_task(self, data):
+    def create_task(self, data, raw_response=False):
         """ Creates a new task in LACRM """
 
         api_method = 'CreateTask'
@@ -226,7 +227,7 @@ class Lacrm(object):
         return api_method, data, expected_parameters
 
     @api_call
-    def create_event(self, date, start_time, end_time, name):
+    def create_event(self, date, start_time, end_time, name, raw_response=False):
         """ Creates a new event in LACRM """
 
         data = {}
@@ -247,7 +248,7 @@ class Lacrm(object):
         return api_method, data, expected_parameters
 
     @api_call
-    def get_pipeline_report(self, pipeline_id):
+    def get_pipeline_report(self, pipeline_id, raw_response=False):
         """ Grabs a pipeline_report in LACRM """
 
         data = {}
