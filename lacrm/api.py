@@ -29,6 +29,7 @@ class Lacrm(object):
         self.api_method_responses = {'CreateContact': 'ContactId',
                                      'CreateNote': 'NoteId',
                                      'CreateTask': 'TaskId',
+                                     'CreateEvent': 'EventId',
                                      'GetContact': 'Contact',
                                      'CreatePipeline': 'PipelineItemId',
                                      'SearchContacts': 'Results',
@@ -227,14 +228,8 @@ class Lacrm(object):
         return api_method, data, expected_parameters
 
     @api_call
-    def create_event(self, date, start_time, end_time, name, raw_response=False):
+    def create_event(self, data, raw_response=False):
         """ Creates a new event in LACRM """
-
-        data = {}
-        data['Date'] = date
-        data['StartTime'] = start_time
-        data['EndTime'] = end_time
-        data['Name'] = name
 
         api_method = 'CreateEvent'
         expected_parameters = ['Date',
@@ -248,10 +243,9 @@ class Lacrm(object):
         return api_method, data, expected_parameters
 
     @api_call
-    def get_pipeline_report(self, pipeline_id, raw_response=False):
+    def get_pipeline_report(self, pipeline_id, data, raw_response=False):
         """ Grabs a pipeline_report in LACRM """
 
-        data = {}
         data['PipelineId'] = pipeline_id
 
         api_method = 'GetPipelineReport'
@@ -278,9 +272,7 @@ class Lacrm(object):
                       'Page': page,
                       'SortBy': 'Status'}
 
-            if status is None:
-                pass
-            elif status in ['all', 'closed']:
+            if status in ['all', 'closed']:
                 params['StatusFilter'] = status
             else:
                 print('That status code is not recognized via the API.')

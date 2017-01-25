@@ -177,3 +177,28 @@ def test_create_task_raw(lacrm_conn):
 
     data = {'DueDate':'2017-12-01', 'Description': 'Important meeting'}
     assert lacrm_conn.create_task(data, raw_response=True) == {"TaskId": "42987108", "Success": True}
+
+@responses.activate
+def test_create_event(lacrm_conn):
+    responses.add(
+        responses.POST,
+        re.compile('^https://api.lessannoyingcrm.com.*$'),
+        body='{"EventId": "42987000", "Success": true}',
+        status=http.OK
+    )
+
+    data = {'Date':'2017-12-01', 'StartTime': '22:00', 'EndTime': '23:00', 'Description': 'Important event'}
+    assert lacrm_conn.create_event(data) == '42987000'
+
+
+@responses.activate
+def test_create_event_raw(lacrm_conn):
+    responses.add(
+        responses.POST,
+        re.compile('^https://api.lessannoyingcrm.com.*$'),
+        body='{"EventId": "42987199", "Success": true}',
+        status=http.OK
+    )
+
+    data = {'Date':'2017-12-01', 'StartTime': '22:00', 'EndTime': '23:00', 'Description': 'Important event'}
+    assert lacrm_conn.create_event(data, raw_response=True) == {"EventId": "42987199", "Success": True}
