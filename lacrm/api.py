@@ -247,7 +247,6 @@ class Lacrm(object):
         """ Grabs a pipeline_report in LACRM """
 
         data['PipelineId'] = pipeline_id
-
         api_method = 'GetPipelineReport'
         expected_parameters = ['PipelineId',
                                'SortBy',
@@ -259,7 +258,7 @@ class Lacrm(object):
 
         return api_method, data, expected_parameters
 
-    def getall_pipeline_report(self, pipeline_id, status=None):
+    def get_all_pipeline_report(self, pipeline_id, status=None):
         """ Grabs a pipeline_report in LACRM """
 
         continue_flag = True
@@ -278,6 +277,8 @@ class Lacrm(object):
                 print('That status code is not recognized via the API.')
 
             respjson = self.get_pipeline_report(pipeline_id, params)
+
+            print('I am here') 
 
             for i in respjson:
                 output.append(i)

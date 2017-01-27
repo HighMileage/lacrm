@@ -209,9 +209,41 @@ def test_get_pipeline_report(lacrm_conn):
     responses.add(
         responses.POST,
         re.compile('^https://api.lessannoyingcrm.com.*$'),
-        body='{"EventId": "42987199", "Success": true}',
+        body='{"Result": [], "Success": true}',
         status=http.OK
     )
 
-    data = {'Date':'2017-12-01', 'StartTime': '22:00', 'EndTime': '23:00', 'Description': 'Important event'}
-    assert lacrm_conn.create_event(data, raw_response=True) == {"EventId": "42987199", "Success": True}
+    data = {}
+    assert lacrm_conn.get_pipeline_report('pipeline_id', data) == []
+
+
+@responses.activate
+def test_get_pipeline_report_raw(lacrm_conn):
+    responses.add(
+        responses.POST,
+        re.compile('^https://api.lessannoyingcrm.com.*$'),
+        body='{"Result": [], "Success": true}',
+        status=http.OK
+    )
+
+    data = {}
+    assert lacrm_conn.get_pipeline_report('pipeline_id', data, raw_response=True) == {"Result": [], "Success": True}
+
+@responses.activate
+def test_get_all_pipeline_report(lacrm_conn):
+    rng = [i for i in range(0,699)]
+    with responses.RequestsMock(assert_all_requests_are_fired=True) as rsps:
+        rsps.add(
+            responses.POST,
+            re.compile('^https://api.lessannoyingcrm.com.*$'),
+            json={'Result': rng[0:500], 'Success': True},
+            status=http.OK
+        )
+        rsps.add(
+            responses.POST,
+            re.compile('^https://api.lessannoyingcrm.com.*$'),
+            json={'Result': rng[500:], 'Success': True},
+            status=http.OK
+        )
+
+        assert lacrm_conn.get_all_pipeline_report('pipeline_id', status='all') == rng
