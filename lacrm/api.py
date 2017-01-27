@@ -5,6 +5,7 @@ import logging
 import requests
 import json
 from lacrm.utils import LacrmArgumentError, BaseLacrmError
+from os.path import expanduser
 
 LOGGER = logging.getLogger(__name__)
 
@@ -15,8 +16,13 @@ class Lacrm(object):
     An instance of Lacrm wraps a LACRM REST API session.
     """
 
-    def __init__(
-            self, user_code=None, api_token=None):
+    def __init__(self, user_code=None, api_token=None):
+
+        creds = self._parse_creds()
+        if user_code is None and api_token is None:
+            self.user_code = creds[0]
+            self.api_token = creds[1]
+
         self.user_code = user_code
         self.api_token = api_token
 
@@ -34,6 +40,35 @@ class Lacrm(object):
                                      'CreatePipeline': 'PipelineItemId',
                                      'SearchContacts': 'Results',
                                      'GetPipelineReport': 'Result'}
+
+    def _parse_creds(self, filename='.lacrm'):
+        """ Parses dot file for lacrm credentials """
+
+        creds = None
+
+        try:
+            file_path = expanduser('~') + '/' + filename
+            with open(file_path, 'r') as credfile:
+                for line in credfile:
+                    if line.strip()[0] == '#':
+                        pass
+                    elif ':' in line:
+                        user_code = line.strip().split(':')[0]
+                        api_token = line.strip().split(':')[1]
+                        creds = user_code, api_token
+                        break
+            return creds
+
+        # Fail silently as most people will not have creds file
+        except IOError:
+            return None
+
+        except (UnboundLocalError, IndexError):
+            print('Attempted to use a credentials dotfile ({}) but '
+                    'it is either empty or malformed. Credentials should be in '
+                    'the form USER_CODE:API_TOKEN.'.format(file_path))
+            raise
+
 
     def api_call(func):
         """ Decorator calls out to the API for specifics API methods """
