@@ -31,5 +31,6 @@ setup(
     keywords="lacrm less annoying CRM lessannoyingcrm.com",
     install_requires=[
         'requests[security]',
-    ]
+    ],
+    license='MIT',
 )
