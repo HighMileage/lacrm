@@ -6,3 +6,6 @@
 .cache
 *.egg
 *.egg-info
+
+build/
+dist/
