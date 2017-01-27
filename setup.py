@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="lacrm",
-    version="0.0.1",
+    version="0.1.1",
     maintainer="Ryan Sellers",
     maintainer_email="curiouschiblog@gmail.com",
     packages=["lacrm"],
