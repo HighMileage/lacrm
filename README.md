@@ -40,4 +40,4 @@ Sometimes you might want to interact with the raw LACRM reponse yourself. In tha
 ```
 
 ## Documentation
-Full documentation can be found [here](https://somedocumentation.com).
+Full documentation is a work in progres but will be up soon.
