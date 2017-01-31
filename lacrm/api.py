@@ -23,8 +23,9 @@ class Lacrm(object):
             self.user_code = creds[0]
             self.api_token = creds[1]
 
-        self.user_code = user_code
-        self.api_token = api_token
+        else:
+            self.user_code = user_code
+            self.api_token = api_token
 
         self.payload = {'UserCode': self.user_code,
                         'APIToken': self.api_token}

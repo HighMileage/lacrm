@@ -24,20 +24,16 @@ Otherwise:
 ```python
 >>> from lacrm import Lacrm
 >>> lacrm = Lacrm(user_code='ABC12', api_token='ASDLFKJP0R3UP0Q32U0P91283JFIOWUERV')
-```
-    
-```python
 >>> data = {'FirstName': 'Mark', 'LastName': 'Wrighton'}
 >>> lacrm.create_contact(data)
 >>> '123940'
->>>
 ```
 
 Sometimes you might want to interact with the raw LACRM reponse yourself. In that case you can pass the `raw_response` flag as `True`
 ```python
->>> lacrm.edit_contact({'ContactId':'123940','FirstName': 'Trent'}, raw_reposne=True)
->>>
+>>> lacrm.edit_contact('123940','{FirstName': 'Trent', 'LastName':'Reznor'}, raw_response=True)
+>>> {u'Success': True}
 ```
 
 ## Documentation
-Full documentation is a work in progres but will be up soon.
+Full documentation coming soon.
