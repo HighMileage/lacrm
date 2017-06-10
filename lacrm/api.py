@@ -314,8 +314,6 @@ class Lacrm(object):
 
             respjson = self.get_pipeline_report(pipeline_id, params)
 
-            print('I am here') 
-
             for i in respjson:
                 output.append(i)
 
