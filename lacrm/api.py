@@ -39,7 +39,7 @@ class Lacrm(object):
                                      'CreateEvent': 'EventId',
                                      'GetContact': 'Contact',
                                      'CreatePipeline': 'PipelineItemId',
-                                     'SearchContacts': 'Results',
+                                     'SearchContacts': 'Result',
                                      'GetPipelineReport': 'Result'}
 
     def _parse_creds(self, filename='.lacrm'):

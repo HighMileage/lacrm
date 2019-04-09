@@ -63,7 +63,7 @@ def test_search(lacrm_conn):
     responses.add(
         responses.POST,
         re.compile('^https://api.lessannoyingcrm.com.*$'),
-        body='{"Results": ["1","2","3"]}',
+        body='{"Result": ["1","2","3"]}',
         status=http.OK
     )
 
