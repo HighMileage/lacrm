@@ -31,7 +31,7 @@ Otherwise:
 
 Sometimes you might want to interact with the raw LACRM response yourself. In that case you can pass the `raw_response` flag as `True`
 ```python
->>> lacrm.edit_contact('123940',{'FirstName': 'Trent', 'LastName':'Reznor'}, raw_response=True)
+>>> lacrm.edit_contact('123940', {'FirstName': 'Trent', 'LastName':'Reznor'}, raw_response=True)
 >>> {u'Success': True}
 ```
 
