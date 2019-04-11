@@ -105,13 +105,41 @@ class Lacrm(object):
         return make_api_call
 
     @api_call
-    def search(self, term, raw_response=False):
+    def search_contacts(self, term, params=None, raw_response=False):
         """ Searches LACRM contacts for a given term """
 
         api_method = 'SearchContacts'
-        data = {'SearchTerms': term}
+        if not params:
+            params = {'SearchTerms': term}
+        else:
+            params.update({'SearchTerms': term})
 
-        return api_method, data, None
+        return api_method, params, None
+
+    def get_all_contacts(self, params=None):
+        """ Searches and returns all LACRM contacts """
+
+        defaults = {'NumRows': 500,
+                    'Page': 1,
+                    'Sort': 'DateEntered'}
+
+        if not params:
+            params = defaults
+        else:
+            params = defaults.update(params)
+
+        all_contacts = []
+        while True:
+            page_of_contacts = self.search_contacts("", params)
+
+            all_contacts = all_contacts + page_of_contacts
+
+            if len(page_of_contacts) < 500:
+                break
+            else:
+                params['Page'] += params['Page']
+
+        return all_contacts
 
     @api_call
     def add_contact_to_group(self, contact_id, group_name, raw_response=False):

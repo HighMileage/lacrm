@@ -59,7 +59,7 @@ def test_delete_contact(lacrm_conn):
 
 
 @responses.activate
-def test_search(lacrm_conn):
+def test_search_contacts(lacrm_conn):
     responses.add(
         responses.POST,
         re.compile('^https://api.lessannoyingcrm.com.*$'),
@@ -67,7 +67,28 @@ def test_search(lacrm_conn):
         status=http.OK
     )
 
-    assert lacrm_conn.search("search term") == ["1","2","3"]
+    data = {}
+    assert lacrm_conn.search_contacts("search term", data) == ["1","2","3"]
+
+
+@responses.activate
+def test_get_all_contacts(lacrm_conn):
+    rng = [i for i in range(0,699)]
+    with responses.RequestsMock(assert_all_requests_are_fired=True) as rsps:
+        rsps.add(
+            responses.POST,
+            re.compile('^https://api.lessannoyingcrm.com.*$'),
+            json={'Result': rng[0:500], 'Success': True},
+            status=http.OK
+        )
+        rsps.add(
+            responses.POST,
+            re.compile('^https://api.lessannoyingcrm.com.*$'),
+            json={'Result': rng[500:], 'Success': True},
+            status=http.OK
+        )
+
+        assert lacrm_conn.get_all_contacts() == rng
 
 
 @responses.activate
