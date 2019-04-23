@@ -137,7 +137,7 @@ class Lacrm(object):
             if len(page_of_contacts) < 500:
                 break
             else:
-                params['Page'] += params['Page']
+                params['Page'] = params['Page'] + 1
 
         return all_contacts
 
